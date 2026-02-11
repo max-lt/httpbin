@@ -17,7 +17,6 @@
     "deploy:prod": "ow main workers upload httpbin ./build"
   },
   "devDependencies": {
-    "@openworkers/adapter-sveltekit": "^0.4.2",
     "@openworkers/workers-types": "^0.1.9",
     "@sveltejs/adapter-auto": "^7.0.0",
     "@sveltejs/kit": "^2.50.1",
@@ -28,5 +27,8 @@
     "svelte-check": "^4.3.5",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "@openworkers/adapter-sveltekit": "^0.5.4"
   }
 }
