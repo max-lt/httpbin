@@ -1,3 +1,5 @@
+// import adapter from '@sveltejs/adapter-vercel';
+// import adapter from '@sveltejs/adapter-netlify';
 import adapter from '@openworkers/adapter-sveltekit';
 import type { Config } from '@sveltejs/kit';
 

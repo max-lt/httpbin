@@ -19,6 +19,8 @@
   "devDependencies": {
     "@openworkers/workers-types": "^0.1.9",
     "@sveltejs/adapter-auto": "^7.0.0",
+    "@sveltejs/adapter-netlify": "^5.2.4",
+    "@sveltejs/adapter-vercel": "^6.3.1",
     "@sveltejs/kit": "^2.50.1",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "prettier": "^3.8.1",
@@ -29,6 +31,6 @@
     "vite": "^7.3.1"
   },
   "dependencies": {
-    "@openworkers/adapter-sveltekit": "^0.5.4"
+    "@openworkers/adapter-sveltekit": "file:../adapter-sveltekit"
   }
 }
