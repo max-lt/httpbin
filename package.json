@@ -1,8 +1,20 @@
 {
   "name": "httpbin",
-  "private": true,
   "version": "0.0.1",
-  "type": "module",
+  "devDependencies": {
+    "@openworkers/adapter-sveltekit": "^0.5.6",
+    "@openworkers/workers-types": "^0.1.9",
+    "@sveltejs/kit": "^2.50.1",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "prettier": "^3.8.1",
+    "prettier-plugin-svelte": "^3.4.1",
+    "rimraf": "^6.1.2",
+    "svelte": "^5.48.2",
+    "svelte-check": "^4.3.5",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  },
+  "private": true,
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
@@ -11,26 +23,10 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "prettier --write .",
-    "predeploy:dev": "vite build",
-    "deploy:dev": "ow dev workers upload httpbin ./build",
-    "predeploy:prod": "vite build",
-    "deploy:prod": "ow main workers upload httpbin ./build"
+    "deploy:dev": "vite build && ow dev workers upload httpbin ./build",
+    "deploy:local": "vite build && ow local workers upload httpbin ./build",
+    "deploy:main": "vite build && ow main workers upload httpbin ./build",
+    "clean": "rimraf build node_modules .svelte-kit .vercel .wrangler .netlify dist"
   },
-  "devDependencies": {
-    "@openworkers/workers-types": "^0.1.9",
-    "@sveltejs/adapter-auto": "^7.0.0",
-    "@sveltejs/adapter-netlify": "^5.2.4",
-    "@sveltejs/adapter-vercel": "^6.3.1",
-    "@sveltejs/kit": "^2.50.1",
-    "@sveltejs/vite-plugin-svelte": "^6.2.4",
-    "prettier": "^3.8.1",
-    "prettier-plugin-svelte": "^3.4.1",
-    "svelte": "^5.48.2",
-    "svelte-check": "^4.3.5",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.1"
-  },
-  "dependencies": {
-    "@openworkers/adapter-sveltekit": "file:../adapter-sveltekit"
-  }
+  "type": "module"
 }
