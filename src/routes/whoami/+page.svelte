@@ -32,7 +32,7 @@
     <dt>Last seen</dt>
     <dd>{data.visited ?? 'First visit!'}</dd>
 
-    <dt>Worker hits (since deploy)</dt>
+    <dt>Page hits</dt>
     <dd>{data.totalHits}</dd>
   </dl>
 

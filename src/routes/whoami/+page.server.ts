@@ -1,75 +1,80 @@
 import type { PageServerLoad } from './$types';
 
-let visitCount = 0;
-
 function hashCode(str: string): number {
-	let hash = 0;
+  let hash = 0;
 
-	for (let i = 0; i < str.length; i++) {
-		hash = (Math.imul(31, hash) + str.charCodeAt(i)) | 0;
-	}
+  for (let i = 0; i < str.length; i++) {
+    hash = (Math.imul(31, hash) + str.charCodeAt(i)) | 0;
+  }
 
-	return Math.abs(hash);
+  return Math.abs(hash);
 }
 
 const animals = ['fox', 'owl', 'wolf', 'bear', 'lynx', 'crow', 'hawk', 'hare', 'deer', 'seal'];
 const adjectives = ['swift', 'silent', 'bold', 'wise', 'keen', 'calm', 'bright', 'deft', 'warm', 'wild'];
 
-export const load: PageServerLoad = async ({ request, cookies, getClientAddress }) => {
-	const userAgent = request.headers.get('user-agent') ?? 'Unknown';
-	const ip = getClientAddress();
-	const lang = request.headers.get('accept-language') ?? 'Unknown';
-	const visited = cookies.get('visited');
-	const visits = parseInt(cookies.get('visits') ?? '0') + 1;
+export const load: PageServerLoad = async ({ request, cookies, getClientAddress, platform }) => {
+  const userAgent = request.headers.get('user-agent') ?? 'Unknown';
+  const ip = getClientAddress();
+  const lang = request.headers.get('accept-language') ?? 'Unknown';
+  const visited = cookies.get('visited');
+  const visits = parseInt(cookies.get('visits') ?? '0') + 1;
 
-	cookies.set('visited', new Date().toISOString(), { path: '/whoami', httpOnly: true });
-	cookies.set('visits', String(visits), { path: '/whoami', httpOnly: true });
+  cookies.set('visited', new Date().toISOString(), { path: '/whoami', httpOnly: true });
+  cookies.set('visits', String(visits), { path: '/whoami', httpOnly: true });
 
-	visitCount++;
+  // Increment visit count via KV (optional, fallback to 0)
+  const kv = platform?.env?.KV;
+  let visitCount = 0;
 
-	// Generate a deterministic codename from IP + user-agent
-	const fingerprint = hashCode(ip + userAgent);
-	const adj = adjectives[fingerprint % adjectives.length];
-	const animal = animals[(fingerprint >> 4) % animals.length];
-	const codename = `${adj}-${animal}-${(fingerprint % 900 + 100)}`;
+  if (kv) {
+    visitCount = ((await kv.get<number>('visitCount')) ?? 0) + 1;
+    await kv.put('visitCount', visitCount);
+  }
 
-	// Server-side prime computation as proof of work
-	const t0 = performance.now();
-	let prime = 2;
-	let count = 0;
-	const target = 10000 + (fingerprint % 5000);
+  // Generate a deterministic codename from IP + user-agent
+  const fingerprint = hashCode(ip + userAgent);
+  const adj = adjectives[fingerprint % adjectives.length];
+  const animal = animals[(fingerprint >> 4) % animals.length];
+  const codename = `${adj}-${animal}-${(fingerprint % 900) + 100}`;
 
-	for (let n = 2; count < target; n++) {
-		let isPrime = true;
+  // Server-side prime computation as proof of work
+  const t0 = performance.now();
+  let prime = 2;
+  let count = 0;
+  const target = 10000 + (fingerprint % 5000);
 
-		for (let d = 2; d * d <= n; d++) {
-			if (n % d === 0) {
-				isPrime = false;
-				break;
-			}
-		}
+  for (let n = 2; count < target; n++) {
+    let isPrime = true;
 
-		if (isPrime) {
-			prime = n;
-			count++;
-		}
-	}
+    for (let d = 2; d * d <= n; d++) {
+      if (n % d === 0) {
+        isPrime = false;
+        break;
+      }
+    }
 
-	const computeMs = (performance.now() - t0).toFixed(2);
+    if (isPrime) {
+      prime = n;
+      count++;
+    }
+  }
 
-	return {
-		ip,
-		userAgent,
-		lang,
-		visited,
-		visits,
-		codename,
-		serverTime: new Date().toISOString(),
-		compute: {
-			nthPrime: target,
-			value: prime,
-			ms: computeMs
-		},
-		totalHits: visitCount
-	};
+  const computeMs = (performance.now() - t0).toFixed(2);
+
+  return {
+    ip,
+    userAgent,
+    lang,
+    visited,
+    visits,
+    codename,
+    serverTime: new Date().toISOString(),
+    compute: {
+      nthPrime: target,
+      value: prime,
+      ms: computeMs
+    },
+    totalHits: visitCount
+  };
 };
